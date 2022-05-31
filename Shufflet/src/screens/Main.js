@@ -1,38 +1,71 @@
-import React, { useState, useEffect, useRef  } from 'react';
+import React, { useState, useEffect, createRef  } from 'react';
 import { StyleSheet, TextInput, View, Text  } from "react-native";
 
 let numberOfLetters = 5;
 let numberOfLines = [];
 let viewRefs = [];
-let lineRef = [];
+let lineRef = [[]];
 
-function configure(){
-  for(let a = 0;a < numberOfLetters+1;a++){
-    if(a == 0){
-      console.log('render');
-    }
-    numberOfLines.push(a)
-    viewRefs.push(React.useRef())
-    if(a < numberOfLetters){
-      lineRef.push(React.useRef);
-    }
-  }
-}
 
-function validateFormAndGoOn(key,setLineFocus){
-  setLineFocus(key+1);
-}
-
-export default function Main () {
-  const [lineFocus, setLineFocus] = useState({ value: 0 })
+const Main = ()  => {
+  const [lineFocus, setLineFocus] = useState(['auto','none','none','none','none','none','none'])
+  useEffect(() => {
+      console.log(lineFocus);
+  }, []);
+  window.addEventListener('keydown', ()=>{ console.log(""); setLineFocus(['none','auto','none','none','none','none','none'])})
+    
   configure();
   return (
-
       <View style = {[style.container]}>
         <Text style = {[style.title]}> Shufflet </Text>
         {
-          numberOfLines.map((a) => (
-            getForms(a,lineFocus, setLineFocus)
+          numberOfLines.map((key) => (
+            <View tabIndex={key} key={key} 
+              pointerEvents={lineFocus[key]}
+              style = {[style.form]} 
+              ref={viewRefs[key] }>
+                <TextInput key={key + '1'} maxLength={1}  style={[style.input]}
+                  ref={lineRef[key][0]}
+                  onChangeText={(value) => {
+                    if (value.length === 1) {
+                      lineRef[key][1].current.focus();
+                    }
+                  }}
+                  returnKeyType="next"/>
+              
+                <Text>{key}</Text>
+                <TextInput key={key + '2'} maxLength={1} style={[style.input]}
+                  ref={lineRef[key][1]}
+                  onChangeText={(value) => {
+                    if (value.length === 1) {
+                      lineRef[key][2].current.focus();
+                    }
+                  }}
+                  returnKeyType="next"/>
+        
+                <TextInput key={key + '3'} maxLength={1} style={[style.input]}
+                  ref={lineRef[key][2]}
+                  onChangeText={(value) => {
+                    if (value.length === 1) {
+                      lineRef[key][3].current.focus();
+                    }
+                  }}
+                  editable={() => {console.log(lineFocus,key); lineFocus == key ? true:false}}
+                  returnKeyType="next"/>
+        
+                <TextInput key={key + '4'} maxLength={1} style={[style.input]}
+                  ref={lineRef[key][3]}
+                  onChangeText={(value) => {
+                    if (value.length === 1) {
+                      lineRef[key][4].current.focus();
+                    }
+                  }}
+                  returnKeyType="next"/>
+        
+                <TextInput key={key + '5'} maxLength={1} style={[style.input]}
+                  ref={lineRef[key][4]}
+                  returnKeyType="next"/>
+            </View>
           ))
         }
       </View>
@@ -40,83 +73,26 @@ export default function Main () {
   );
 }
 
-function getForms(key,lineFocus, setLineFocus){
-  viewRefs.push(React.useRef());
-  return(
-    <View key={key} style = {[style.form]} ref={viewRefs[key]} onKeyDown={validateFormAndGoOn(key,setLineFocus)}>
-      <TextInput key={key + '1'} maxLength={1}  style={[style.input]}
-        ref={lineRef[0]}
-        onChangeText={(value) => {
-          if (value.length === 1) {
-            lineRef[1].current.focus();
-          }
-        }}
-        editable={() => isEditable(key,lineFocus)}
-        returnKeyType="next"/>
-      
-      <TextInput key={key + '2'} maxLength={1} style={[style.input]}
-        ref={lineRef[1]}
-        onChangeText={(value) => {
-          if (value.length === 1) {
-            lineRef[2].current.focus();
-          }
-        }}
-        editable={() => isEditable(key,lineFocus)}
-        returnKeyType="next"/>
-
-      <TextInput key={key + '3'} maxLength={1} style={[style.input]}
-        ref={lineRef[2]}
-        onChangeText={(value) => {
-          if (value.length === 1) {
-            lineRef[3].current.focus();
-          }
-        }}
-        editable={() => isEditable(key,lineFocus)}
-        returnKeyType="next"/>
-
-      <TextInput key={key + '4'} maxLength={1} style={[style.input]}
-        ref={lineRef[3]}
-        onChangeText={(value) => {
-          if (value.length === 1) {
-            lineRef[4].current.focus();
-          }
-        }}
-        editable={() => isEditable(key,lineFocus)}
-        returnKeyType="next"/>
-
-      <TextInput key={key + '5'} maxLength={1} style={[style.input]}
-        ref={lineRef[4]}
-        onChangeText={(value) => {
-          if (value.length === 1) {
-            lineRef[5].current.focus();
-          }
-        }}
-        editable={() => isEditable(key,lineFocus)}
-        returnKeyType="next"/>
-    </View>
-  )
-}
-function isEditable(key,lineFocus){
-  console.log(key,lineFocus)
-  if(lineFocus == key){
-    return true;
-  }else{
-    return false;
+function configure(){
+  for(let a = 0;a < numberOfLetters+1;a++){
+    numberOfLines.push(a)
+    viewRefs.push(React.createRef())
+    for(let b = 0; b<numberOfLetters ; b++){
+      if(b == 0){
+        lineRef[a] = []
+      }
+      lineRef[a].push(React.createRef());
+    }
   }
 }
 
+
+export default Main;
+
 const style = StyleSheet.create({
-  father: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    height: 'auto',
-  },
   container: {
-    flexWrap: 'wrap',
     flex : 1,
     flexDirection : 'column',
-    marginLeft: 'auto',
-    marginRight: 'auto'
   },
   title:{
     color:'grey',
@@ -126,10 +102,8 @@ const style = StyleSheet.create({
     fontSize:30
   }, 
   form: {
-    flexWrap: 'wrap',
     flex: 1,
-    flexDirection:'row',
-    marginLeft:'7%'
+    flexDirection:'row'
   },
   input: {
     padding:'7%',
@@ -139,6 +113,7 @@ const style = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 10,
+    flex:1
   },
   button: {
     backgroundColor: '#228CDB'
