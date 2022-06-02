@@ -1,19 +1,25 @@
 import React, { useState, useEffect, createRef  } from 'react';
 import { StyleSheet, TextInput, View, Text  } from "react-native";
 
+
 let numberOfLetters = 5;
 let numberOfLines = [];
 let viewRefs = [];
 let lineRef = [[]];
 
-
 const Main = ()  => {
   const [lineFocus, setLineFocus] = useState(['auto','none','none','none','none','none','none'])
+  numberOfLetters = 5;
+  numberOfLines = [];
+  viewRefs = [];
+  lineRef = [[]];
   useEffect(() => {
       console.log(lineFocus);
   }, []);
-  window.addEventListener('keydown', ()=>{ console.log(""); setLineFocus(['none','auto','none','none','none','none','none'])})
-    
+  const handleSubmitEditing = (key) => {
+    setLineFocus(['none','auto','none','none','none','none','none'])
+    lineRef[key+1][0].current.focus();
+  }
   configure();
   return (
       <View style = {[style.container]}>
@@ -23,8 +29,9 @@ const Main = ()  => {
             <View tabIndex={key} key={key} 
               pointerEvents={lineFocus[key]}
               style = {[style.form]} 
-              ref={viewRefs[key] }>
-                <TextInput key={key + '1'} maxLength={1}  style={[style.input]}
+              ref={viewRefs[key] }
+              onSubmitEditing={() => handleSubmitEditing(key)}>
+                <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
                   ref={lineRef[key][0]}
                   onChangeText={(value) => {
                     if (value.length === 1) {
@@ -32,9 +39,7 @@ const Main = ()  => {
                     }
                   }}
                   returnKeyType="next"/>
-              
-                <Text>{key}</Text>
-                <TextInput key={key + '2'} maxLength={1} style={[style.input]}
+                <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
                   ref={lineRef[key][1]}
                   onChangeText={(value) => {
                     if (value.length === 1) {
@@ -43,17 +48,16 @@ const Main = ()  => {
                   }}
                   returnKeyType="next"/>
         
-                <TextInput key={key + '3'} maxLength={1} style={[style.input]}
+                <TextInput  tabIndex={key + '3'} key={key + '3'} maxLength={1} style={[style.input]}
                   ref={lineRef[key][2]}
                   onChangeText={(value) => {
                     if (value.length === 1) {
                       lineRef[key][3].current.focus();
                     }
                   }}
-                  editable={() => {console.log(lineFocus,key); lineFocus == key ? true:false}}
                   returnKeyType="next"/>
         
-                <TextInput key={key + '4'} maxLength={1} style={[style.input]}
+                <TextInput  tabIndex={key + '4'} key={key + '4'} maxLength={1} style={[style.input]}
                   ref={lineRef[key][3]}
                   onChangeText={(value) => {
                     if (value.length === 1) {
@@ -62,7 +66,7 @@ const Main = ()  => {
                   }}
                   returnKeyType="next"/>
         
-                <TextInput key={key + '5'} maxLength={1} style={[style.input]}
+                <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
                   ref={lineRef[key][4]}
                   returnKeyType="next"/>
             </View>
@@ -84,6 +88,7 @@ function configure(){
       lineRef[a].push(React.createRef());
     }
   }
+  console.log(numberOfLines)
 }
 
 
