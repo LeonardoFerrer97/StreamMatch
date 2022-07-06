@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let numberOfLetters = 5;
 
-const Main = ()  => {
+const Main = ()  => {     
   const [lineFocus, setLineFocus] = useState(['auto','none','none','none','none','none'])
   const [word, setWord] = useState('')
   const [coutingChars, setCoutingChars] = useState({})
@@ -24,8 +24,30 @@ const Main = ()  => {
       setCoutingChars(newCoutingChars)
     })
   }, []);
-  const handleSubmitEditing = (key) => {
+  const handleSubmitEditing = async (key) => {
     if(key < 5){
+      var wordExist = "";
+      for(let a = 0;a<viewRefs[key].current.children.length;a++){
+        wordExist += lineRef[key][a].current.value
+      }
+      var exists = true;
+       await fetch('https://generaterandomword.herokuapp.com/words/exists/' + wordExist )
+        .then((response) => response.text())
+        .then((json) => {
+          console.log(json)
+          if(json == "false"){
+            console.log("doesnt exist")
+            exists = false;
+          }
+        });
+      console.log(exists)
+      if(!exists){
+        for(let a = 0;a<viewRefs[key].current.children.length;a++){
+          lineRef[key][a].current.clear()
+        }
+        lineRef[key][0].current.focus()
+        return;
+      }
       var isSolved = true;
       var containingChars = [];
       let coutingCharsAux = coutingChars
@@ -59,7 +81,6 @@ const Main = ()  => {
         return
       }
       for(let b in containingChars){
-        console.log(b.char)
         if(coutingCharsAux[containingChars[b].char] > 0){
           lineRef[key][containingChars[b].a].current.setNativeProps({
             style:{backgroundColor: '#fff700'}
@@ -107,6 +128,10 @@ const Main = ()  => {
                       lineRef[key][1].current.focus();
                     }
                   }}
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === 'Backspace') {
+                    }
+                  }}
                   returnKeyType="next"
                   onSubmitEditing={() => handleSubmitEditing(key)}/>
                 <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
@@ -114,6 +139,11 @@ const Main = ()  => {
                   onChangeText={(value) => {
                     if (value.length === 1) {
                       lineRef[key][2].current.focus();
+                    }
+                  }}
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === 'Backspace') {
+                      lineRef[key][0].current.focus();
                     }
                   }}
                   returnKeyType="next"
@@ -126,6 +156,11 @@ const Main = ()  => {
                       lineRef[key][3].current.focus();
                     }
                   }}
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === 'Backspace') {
+                      lineRef[key][1].current.focus();
+                    }
+                  }}
                   returnKeyType="next"
                   onSubmitEditing={() => handleSubmitEditing(key)}/>
         
@@ -136,12 +171,23 @@ const Main = ()  => {
                       lineRef[key][4].current.focus();
                     }
                   }}
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === 'Backspace') {
+                      lineRef[key][2].current.focus();
+                    }
+                  }}
                   returnKeyType="next"
                   onSubmitEditing={() => handleSubmitEditing(key)}/>
         
                 <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
                   ref={lineRef[key][4]}
                   returnKeyType="next"
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === 'Backspace') {
+                      lineRef[key][4].current.clear();
+                      lineRef[key][3].current.focus();
+                    }
+                  }}
                   onSubmitEditing={() => handleSubmitEditing(key)}/>
             </View>
           ))

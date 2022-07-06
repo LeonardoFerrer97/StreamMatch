@@ -13,19 +13,18 @@ const Stack = createStackNavigator();
 export default function App() {
   const storeData = async (value) => {
     try {
-      AsyncStorage.setItem('fiveCharWord', 'carol');
-      await AsyncStorage.getItem('fiveCharWordx').then(res => {
-        if(res != undefined){
-          FileSystem.readAsStringAsync("/assets/palavras5.txt") // 'base64' for binary 
-            .then(res => {
-              AsyncStorage.setItem('fiveCharWord',res[Math.floor(Math.random() * res.length)]);
-            })
-            .catch(console.error)
-          AsyncStorage.setItem('sixChars', 'value');
-          AsyncStorage.setItem('sevenChars', 'value');
-          AsyncStorage.setItem('eightChars', 'value');
-        }
-      })
+      fetch('https://generaterandomword.herokuapp.com/words/five')
+        .then((response) => response.text())
+        .then((json) => AsyncStorage.setItem('fiveCharWord', json));
+      fetch('https://generaterandomword.herokuapp.com/words/six')
+        .then((response) => response.text())
+        .then((json) => AsyncStorage.setItem('sixCharWord', json));
+      fetch('https://generaterandomword.herokuapp.com/words/seven')
+        .then((response) => response.text())
+        .then((json) => AsyncStorage.setItem('sevenCharWord', json));
+      fetch('https://generaterandomword.herokuapp.com/words/eight')
+        .then((response) => response.text())
+        .then((json) => AsyncStorage.setItem('eightCharWord', json));
     }catch (e) {
       // saving error
     }
