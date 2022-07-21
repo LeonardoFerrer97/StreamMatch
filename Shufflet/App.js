@@ -6,8 +6,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Main from './src/screens/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system'
-
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -30,6 +28,20 @@ export default function App() {
     }
   }
   storeData()
+  AsyncStorage.getItem('0').then((res) => {
+    AsyncStorage.setItem('0', "0")
+    AsyncStorage.setItem('1', "0")
+    AsyncStorage.setItem('2', "0")
+    AsyncStorage.setItem('3', "0")
+    AsyncStorage.setItem('4', "0")
+    AsyncStorage.setItem('5', "0")
+    AsyncStorage.setItem('6', "0")
+    AsyncStorage.setItem('7', "0")
+    AsyncStorage.setItem('totalGames', "0")
+    AsyncStorage.setItem('totalSolved', "0")
+    AsyncStorage.setItem('solvedInARow', "0")
+    AsyncStorage.setItem('maxSolvedInARow', "0")
+  })
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerStyle: {backgroundColor: '#228CDB'},headerTintColor: '#fff'}} initialRouteName="Main">
