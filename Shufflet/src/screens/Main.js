@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, View, Text  } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import ModalHistory from './ModalHistory';
 
 let numberOfLetters = 5;
 
 const Main = ()  => {     
   const [lineFocus, setLineFocus] = useState(['auto','none','none','none','none','none'])
   const [word, setWord] = useState('')
+  const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false)
   const [coutingChars, setCoutingChars] = useState({})
   const [viewRefs, setViewRefs] = useState([])
   const [lineRef, setLineRef] = useState([[]])
@@ -25,7 +26,8 @@ const Main = ()  => {
     })
   }, []);
   const handleSubmitEditing = async (key) => {
-    if(key < 5){
+    console.log(key)
+    
       var wordExist = "";
       for(let a = 0;a<viewRefs[key].current.children.length;a++){
         wordExist += lineRef[key][a].current.value
@@ -34,13 +36,11 @@ const Main = ()  => {
        await fetch('https://generaterandomword.herokuapp.com/words/exists/' + wordExist )
         .then((response) => response.text())
         .then((json) => {
-          console.log(json)
           if(json == "false"){
             console.log("doesnt exist")
             exists = false;
           }
         });
-      console.log(exists)
       if(!exists){
         for(let a = 0;a<viewRefs[key].current.children.length;a++){
           lineRef[key][a].current.clear()
@@ -50,7 +50,8 @@ const Main = ()  => {
       }
       var isSolved = true;
       var containingChars = [];
-      let coutingCharsAux = coutingChars
+      let coutingCharsAux = {};
+      Object.assign(coutingCharsAux,coutingChars)
       for(let a = 0;a<viewRefs[key].current.children.length;a++){
         var char = lineRef[key][a].current.value
         if(char == ''){
@@ -77,6 +78,21 @@ const Main = ()  => {
         }
       }
       if(isSolved){
+        AsyncStorage.getItem(key).then((res) => {
+          AsyncStorage.setItem(key.toString(), (parseInt(parseInt(res) + 1)).toString())
+          AsyncStorage.getItem("totalSolved").then((res) => {
+            AsyncStorage.setItem("totalSolved", (parseInt(res)+ 1 ).toString())
+            AsyncStorage.getItem("solvedInARow").then((res) => {
+              AsyncStorage.setItem("solvedInARow", (parseInt(res)+ 1 ).toString())
+              AsyncStorage.getItem("MaxSolvedInARow").then((max) => {
+                if(parseInt(res) > parseInt(max)){
+                  AsyncStorage.setItem("solvedInARow",  (parseInt(res)+ 1 ).toString())
+                }
+                setIsModalHistoryOpen(true)
+              })
+            })
+          })
+        })
         setLineFocus(['none','none','none','none','none','none'])
         return
       }
@@ -92,7 +108,7 @@ const Main = ()  => {
       newLineFocus[key+1] = 'auto'
       setLineFocus(newLineFocus)
       lineRef[key+1][0].current.focus();
-    }
+    
   }
   const configure = () => {
     for(let a = 0;a < numberOfLetters+1;a++){
@@ -111,90 +127,121 @@ const Main = ()  => {
       }
     }
   }
+  if(!isModalHistoryOpen){
     return (
       <View style = {[style.container]}>
-        <Text style = {[style.title]}> Shufflet </Text>
-        {
-          numberOfLines.map((key) => (
-            <View tabIndex={key} key={key} 
-              pointerEvents={lineFocus[key]}
-              style = {[style.form]} 
-              ref={viewRefs[key] }
-              onSubmitEditing={() => handleSubmitEditing(key)}>
-                <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
-                  ref={lineRef[key][0]}
-                  onChangeText={(value) => {
-                    if (value.length === 1) {
-                      lineRef[key][1].current.focus();
-                    }
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === 'Backspace') {
-                    }
-                  }}
-                  returnKeyType="next"
-                  onSubmitEditing={() => handleSubmitEditing(key)}/>
-                <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
-                  ref={lineRef[key][1]}
-                  onChangeText={(value) => {
-                    if (value.length === 1) {
-                      lineRef[key][2].current.focus();
-                    }
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === 'Backspace') {
-                      lineRef[key][0].current.focus();
-                    }
-                  }}
-                  returnKeyType="next"
-                  onSubmitEditing={() => handleSubmitEditing(key)}/>
-        
-                <TextInput  tabIndex={key + '3'} key={key + '3'} maxLength={1} style={[style.input]}
-                  ref={lineRef[key][2]}
-                  onChangeText={(value) => {
-                    if (value.length === 1) {
-                      lineRef[key][3].current.focus();
-                    }
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === 'Backspace') {
-                      lineRef[key][1].current.focus();
-                    }
-                  }}
-                  returnKeyType="next"
-                  onSubmitEditing={() => handleSubmitEditing(key)}/>
-        
-                <TextInput  tabIndex={key + '4'} key={key + '4'} maxLength={1} style={[style.input]}
-                  ref={lineRef[key][3]}
-                  onChangeText={(value) => {
-                    if (value.length === 1) {
-                      lineRef[key][4].current.focus();
-                    }
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === 'Backspace') {
-                      lineRef[key][2].current.focus();
-                    }
-                  }}
-                  returnKeyType="next"
-                  onSubmitEditing={() => handleSubmitEditing(key)}/>
-        
-                <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
-                  ref={lineRef[key][4]}
-                  returnKeyType="next"
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === 'Backspace') {
-                      lineRef[key][4].current.clear();
-                      lineRef[key][3].current.focus();
-                    }
-                  }}
-                  onSubmitEditing={() => handleSubmitEditing(key)}/>
-            </View>
-          ))
-        }
-      </View>
-        
-  );
+              <Text style = {[style.title]}> Shufflet </Text>
+              {
+                numberOfLines.map((key) => (
+                  <View tabIndex={key} key={key} 
+                    pointerEvents={lineFocus[key]}
+                    style = {[style.form]} 
+                    ref={viewRefs[key] }
+                    onSubmitEditing={() => handleSubmitEditing(key)}>
+                      <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
+                        ref={lineRef[key][0]}
+                        onChangeText={(value) => {
+                          if (value.length === 1) {
+                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              lineRef[key][0].current.clear();
+                              console.log("nao pode char especial")
+                            }else{
+                              lineRef[key][1].current.focus();
+                            }
+                          }
+                        }}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Backspace') {
+                          }
+                        }}
+                        returnKeyType="next"
+                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                      <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
+                        ref={lineRef[key][1]}
+                        onChangeText={(value) => {
+                          if (value.length === 1) {
+                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              lineRef[key][1].current.clear();
+                              console.log("nao pode char especial")
+                            }else{
+                              lineRef[key][2].current.focus();
+                            }
+                          }
+                        }}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Backspace') {
+                            lineRef[key][0].current.focus();
+                          }
+                        }}
+                        returnKeyType="next"
+                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+              
+                      <TextInput  tabIndex={key + '3'} key={key + '3'} maxLength={1} style={[style.input]}
+                        ref={lineRef[key][2]}
+                        onChangeText={(value) => {
+                          if (value.length === 1) {
+                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              lineRef[key][2].current.clear();
+                              console.log("nao pode char especial")
+                            }else{
+                              lineRef[key][3].current.focus();
+                            }
+                          }
+                        }}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Backspace') {
+                            lineRef[key][1].current.focus();
+                          }
+                        }}
+                        returnKeyType="next"
+                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+              
+                      <TextInput  tabIndex={key + '4'} key={key + '4'} maxLength={1} style={[style.input]}
+                        ref={lineRef[key][3]}
+                        onChangeText={(value) => {
+                          if (value.length === 1) {
+                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              lineRef[key][3].current.clear();
+                              console.log("nao pode char especial")
+                            }else{
+                              lineRef[key][4].current.focus();
+                            }
+                          }
+                        }}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Backspace') {
+                            lineRef[key][2].current.focus();
+                          }
+                        }}
+                        returnKeyType="next"
+                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+              
+                      <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
+                        ref={lineRef[key][4]}
+                        returnKeyType="next"
+                        onChangeText={(value) => {
+                          if (value.length === 1) {
+                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              lineRef[key][4].current.clear();
+                              console.log("nao pode char especial")
+                            }
+                          }
+                        }}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Backspace') {
+                            lineRef[key][4].current.clear();
+                            lineRef[key][3].current.focus();
+                          }
+                        }}
+                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                  </View>
+                ))
+              }
+      </View>          
+    );
+  }else{
+    return <ModalHistory open={isModalHistoryOpen} onClose={()=> setIsModalHistoryOpen(false)} numberOfLines={numberOfLines} />
+  }
 }
 
 
