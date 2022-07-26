@@ -73,7 +73,14 @@ const Main = ()  => {
           isSolved = false;
           var containChar = {char:char,a:a};
           containingChars.push(containChar)
+          lineRef[key][a].current.setNativeProps({
+            style:{backgroundColor: 'grey'}
+          });
         }else{
+          lineRef[key][a].current.setNativeProps({
+            style:{backgroundColor: 'grey'}
+          });
+
           isSolved = false;
         }
       }
@@ -102,6 +109,11 @@ const Main = ()  => {
             style:{backgroundColor: '#fff700'}
           });
           coutingCharsAux[containingChars[b].char]--
+        }else{
+          lineRef[key][containingChars[b].a].current.setNativeProps({
+            style:{backgroundColor: 'grey'}
+          });
+
         }
       }
       const newLineFocus = (['none','none','none','none','none','none']);
@@ -254,17 +266,18 @@ const style = StyleSheet.create({
   },
   title:{
     color:'grey',
-    flex:1,
     alignSelf: 'center',
-    margin: 'auto',
     fontSize:30
   }, 
   form: {
-    flex: 1,
+    justifyContent:'center',
     flexDirection:'row'
   },
-  input: {
-    padding:'7%',
+  input: { 
+    fontSize: '200%',
+    maxWidth: '15%',
+    height: 'auto',
+    textAlign:'center',
     marginRight:5,
     marginLeft:5,
     marginBottom:0,

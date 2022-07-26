@@ -1,17 +1,14 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { Icon } from 'react-native-elements'
-import { StyleSheet } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import Tutorial from "./src/screens/Tutorial"
+import {  StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Main from './src/screens/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MenuHeader from './src/screens/MenuHeader'
-const Stack = createStackNavigator();
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
-  
+const Drawer = createDrawerNavigator();
 
-   
 export default function App() {
   const storeData = async (value) => {
     try {
@@ -48,24 +45,11 @@ export default function App() {
   })
   return (
     <NavigationContainer>
-      <View>
-        <MenuHeader></MenuHeader>
-      </View>
-      <Stack.Screen 
-          name="Main" 
-          component={Main}  
-          options={({navigation}) => ({
-            headerRight: () => (
-              <Icon 
-                name="plus" 
-                type="feather" 
-                color="#fff"
-                style={style.headerIcon}
-                onPress={() => navigation.navigate('Main')}
-              />
-            )
-          })}
-        />
+      <Drawer.Navigator useLegacyImplementation initialRouteName="Shufflet Cinco Letras">
+        <Drawer.Screen name="Shufflet Cinco Letras" component={Main} />
+        <Drawer.Screen name="Shufflet seis Letras" component={Main} />
+        <Drawer.Screen name="Shufflet Tutorial" component={Tutorial} />
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 }
