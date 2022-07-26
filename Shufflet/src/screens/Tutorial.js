@@ -4,7 +4,7 @@ const Tutorial = ()  => {
       return (
           <View style = {[style.container]}>
               <Text style = {[style.title]}> Descubra a palavra certa em 6 ou mais tentativas. </Text>
-              <Text style = {[style.title]}> Depois de cada tentativa, as peças mostram o quão certo você está da resposta </Text>
+              <Text style = {[style.title]}> Depois de cada tentativa, as peças mostram o quão perto você está da resposta </Text>
                     <View style = {[style.form]}  pointerEvents={"none"}>
                       <TextInput style={[style.input,{backgroundColor: '#3fba29'}]} value="P"/>
                       <TextInput style={[style.input]} value="U"/>
@@ -28,9 +28,9 @@ const Tutorial = ()  => {
                       <TextInput style={[style.input,{backgroundColor: 'gray'}]} value="L"/>
                       <TextInput style={[style.input]} value="A"/>
                       </View>
-              <Text style = {[style.title]}> A letra L faz parte da palavra, mas em outro lugar</Text>
-              <Text style = {[style.title]}> Não é necessário se preocupar com acentuação</Text>
-              <Text style = {[style.title]}> Há a possibilidade de ter letras repetidas</Text>
+              <Text style = {[style.title]}> A letra L não faz parte da palavra.</Text>
+              <Text style = {[style.title]}> Não é necessário se preocupar com acentuação.</Text>
+              <Text style = {[style.title]}> Há a possibilidade de ter letras repetidas.</Text>
               <Text style = {[style.title]}> Uma palavra nova surge por dia.</Text>
             </View>      
     );
