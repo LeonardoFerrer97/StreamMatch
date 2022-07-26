@@ -6,8 +6,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Main from './src/screens/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MenuHeader from './src/screens/MenuHeader'
 const Stack = createStackNavigator();
 
+  
+
+   
 export default function App() {
   const storeData = async (value) => {
     try {
@@ -44,7 +48,9 @@ export default function App() {
   })
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerStyle: {backgroundColor: '#228CDB'},headerTintColor: '#fff'}} initialRouteName="Main">
+      <View>
+        <MenuHeader></MenuHeader>
+      </View>
       <Stack.Screen 
           name="Main" 
           component={Main}  
@@ -60,7 +66,6 @@ export default function App() {
             )
           })}
         />
-      </Stack.Navigator>
     </NavigationContainer>
   );
 }
