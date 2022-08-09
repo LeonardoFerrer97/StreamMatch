@@ -33,7 +33,7 @@ const Tutorial = ()  => {
               <Text style = {[style.title]}> Há a possibilidade de ter letras repetidas.</Text>
               <Text style = {[style.title]}> Uma palavra nova surge por dia.</Text>
             </View>      
-    );
+    ); 
   }
   const style = StyleSheet.create({
     container: {
