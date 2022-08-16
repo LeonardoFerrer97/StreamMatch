@@ -52,9 +52,9 @@ const Tutorial = ()  => {
       flexDirection:'row'
     },
     input: { 
-      fontSize: '200%',
+      fontSize: 200,
       maxWidth: '15%',
-      height: 'auto',
+      height: '10',
       textAlign:'center',
       marginRight:5,
       marginLeft:5,

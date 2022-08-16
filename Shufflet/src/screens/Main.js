@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TextInput, View, Text  } from "react-native";
+import { StyleSheet, TextInput, View, Alert  } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalHistory from './ModalHistory';
 
@@ -26,10 +26,17 @@ const Main = ()  => {
     })
   }, []);
   const handleSubmitEditing = async (key) => {
-    console.log(key)
-    
+    for(let a = 0;a<numberOfLetters;a++){
+      var char = lineRef[key][a].current.value
+      console.log(char)
+      if(char == undefined || char == ''){
+        Alert.alert("Essa palavra é muito curta")
+        lineRef[key][0].current.focus();
+        return;
+      }
+    }
       var wordExist = "";
-      for(let a = 0;a<viewRefs[key].current.children.length;a++){
+      for(let a = 0;a<numberOfLetters;a++){
         wordExist += lineRef[key][a].current.value
       }
       var exists = true;
@@ -37,12 +44,14 @@ const Main = ()  => {
         .then((response) => response.text())
         .then((json) => {
           if(json == "false"){
-            console.log("doesnt exist")
+            Alert.alert(wordExist +" não existe")
             exists = false;
           }
         });
       if(!exists){
-        for(let a = 0;a<viewRefs[key].current.children.length;a++){
+        for(let a = 0;a<numberOfLetters;a++){
+          lineRef[key][a].current.value = undefined
+          console.log("value: " + lineRef[key][a].current.value)
           lineRef[key][a].current.clear()
         }
         lineRef[key][0].current.focus()
@@ -52,15 +61,7 @@ const Main = ()  => {
       var containingChars = [];
       let coutingCharsAux = {};
       Object.assign(coutingCharsAux,coutingChars)
-      for(let a = 0;a<viewRefs[key].current.children.length;a++){
-        var char = lineRef[key][a].current.value
-        if(char == ''){
-          console.log('incompleto')
-          lineRef[key][0].current.focus();
-          return;
-        }
-      }
-      for(let a = 0;a<viewRefs[key].current.children.length;a++){
+      for(let a = 0;a<numberOfLetters;a++){
         var char = lineRef[key][a].current.value
         if(char == word[a]){
           lineRef[key][a].current.setNativeProps({
@@ -139,25 +140,27 @@ const Main = ()  => {
       }
     }
   }
+
+
   if(!isModalHistoryOpen){
     return (
       <View style = {[style.container]}>
-              <Text style = {[style.title]}> Shufflet </Text>
               {
                 numberOfLines.map((key) => (
                   <View tabIndex={key} key={key} 
                     pointerEvents={lineFocus[key]}
                     style = {[style.form]} 
-                    ref={viewRefs[key] }
-                    onSubmitEditing={() => handleSubmitEditing(key)}>
+                    ref={viewRefs[key]}>
                       <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
                         ref={lineRef[key][0]}
                         onChangeText={(value) => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
                               lineRef[key][0].current.clear();
-                              console.log("nao pode char especial")
+                              Alert.alert("Esse character não é permitido")
+                              lineRef[key][0].current.focus();
                             }else{
+                              lineRef[key][0].current.value = value;
                               lineRef[key][1].current.focus();
                             }
                           }
@@ -174,8 +177,10 @@ const Main = ()  => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
                               lineRef[key][1].current.clear();
-                              console.log("nao pode char especial")
+                              Alert.alert("Esse character não é permitido")
+                              lineRef[key][1].current.focus();
                             }else{
+                              lineRef[key][1].current.value = value;
                               lineRef[key][2].current.focus();
                             }
                           }
@@ -194,8 +199,9 @@ const Main = ()  => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
                               lineRef[key][2].current.clear();
-                              console.log("nao pode char especial")
+                              Alert.alert("Esse character não é permitido")
                             }else{
+                              lineRef[key][2].current.value = value;
                               lineRef[key][3].current.focus();
                             }
                           }
@@ -214,8 +220,9 @@ const Main = ()  => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
                               lineRef[key][3].current.clear();
-                              console.log("nao pode char especial")
+                              Alert.alert("Esse character não é permitido")
                             }else{
+                              lineRef[key][3].current.value = value;
                               lineRef[key][4].current.focus();
                             }
                           }
@@ -235,7 +242,10 @@ const Main = ()  => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
                               lineRef[key][4].current.clear();
-                              console.log("nao pode char especial")
+                              Alert.alert("Esse character não é permitido")
+                            }else{
+                              
+                              lineRef[key][4].current.value = value;
                             }
                           }
                         }}
@@ -263,6 +273,8 @@ const style = StyleSheet.create({
   container: {
     flex : 1,
     flexDirection : 'column',
+    maxHeight: '100%',
+    overflow: 'scroll'
   },
   title:{
     color:'grey',
@@ -274,9 +286,9 @@ const style = StyleSheet.create({
     flexDirection:'row'
   },
   input: { 
-    fontSize: '200%',
+    fontSize: 200,
     maxWidth: '15%',
-    height: 'auto',
+    maxHeight: '30%',
     textAlign:'center',
     marginRight:5,
     marginLeft:5,
