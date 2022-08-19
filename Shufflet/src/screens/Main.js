@@ -152,7 +152,8 @@ const Main = ()  => {
                     pointerEvents={lineFocus[key]}
                     style = {[style.form]} 
                     ref={viewRefs[key]}>
-                      <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}showSoftInputOnFocus={false}
+                      <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
+                      showSoftInputOnFocus={false}
                         ref={lineRef[key][0]}
                         onChange={(event) => {
                         }}
@@ -175,6 +176,7 @@ const Main = ()  => {
                         returnKeyType="next"
                         onSubmitEditing={() => handleSubmitEditing(key)}/>
                       <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
+                      showSoftInputOnFocus={false}
                         ref={lineRef[key][1]}
                         onChangeText={(value) => {
                           if (value.length === 1) {
@@ -197,6 +199,7 @@ const Main = ()  => {
                         onSubmitEditing={() => handleSubmitEditing(key)}/>
               
                       <TextInput  tabIndex={key + '3'} key={key + '3'} maxLength={1} style={[style.input]}
+                      showSoftInputOnFocus={false}
                         ref={lineRef[key][2]}
                         onChangeText={(value) => {
                           if (value.length === 1) {
@@ -218,6 +221,7 @@ const Main = ()  => {
                         onSubmitEditing={() => handleSubmitEditing(key)}/>
               
                       <TextInput  tabIndex={key + '4'} key={key + '4'} maxLength={1} style={[style.input]}
+                      showSoftInputOnFocus={false}
                         ref={lineRef[key][3]}
                         onChangeText={(value) => {
                           if (value.length === 1) {
@@ -239,6 +243,7 @@ const Main = ()  => {
                         onSubmitEditing={() => handleSubmitEditing(key)}/>
               
                       <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
+                      showSoftInputOnFocus={false}
                         ref={lineRef[key][4]}
                         returnKeyType="next"
                         onChangeText={(value) => {
