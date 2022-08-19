@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, View, Alert  } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalHistory from './ModalHistory';
+import Keyboard from './Keyboard';
 
 let numberOfLetters = 5;
 
@@ -151,14 +152,16 @@ const Main = ()  => {
                     pointerEvents={lineFocus[key]}
                     style = {[style.form]} 
                     ref={viewRefs[key]}>
-                      <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
+                      <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}showSoftInputOnFocus={false}
                         ref={lineRef[key][0]}
+                        onChange={(event) => {
+                        }}
                         onChangeText={(value) => {
                           if (value.length === 1) {
                             if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
+                              console.log(lineRef[key][0]._root)
                               lineRef[key][0].current.clear();
                               Alert.alert("Esse character não é permitido")
-                              lineRef[key][0].current.focus();
                             }else{
                               lineRef[key][0].current.value = value;
                               lineRef[key][1].current.focus();
@@ -259,6 +262,8 @@ const Main = ()  => {
                   </View>
                 ))
               }
+              
+              <Keyboard/>
       </View>          
     );
   }else{
@@ -273,7 +278,6 @@ const style = StyleSheet.create({
   container: {
     flex : 1,
     flexDirection : 'column',
-    maxHeight: '100%',
     overflow: 'scroll'
   },
   title:{
