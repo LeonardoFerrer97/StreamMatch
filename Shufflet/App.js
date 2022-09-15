@@ -1,7 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import Tutorial from "./src/screens/Tutorial"
-import {  StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Main from './src/screens/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,16 +13,16 @@ export default function App() {
     try {
       fetch('https://generaterandomword.herokuapp.com/words/five')
         .then((response) => response.text())
-        .then((json) => AsyncStorage.setItem('fiveCharWord', json));
+        .then((json) => AsyncStorage.setItem('fiveCharWord', json.toUpperCase()));
       fetch('https://generaterandomword.herokuapp.com/words/six')
         .then((response) => response.text())
-        .then((json) => AsyncStorage.setItem('sixCharWord', json));
+        .then((json) => AsyncStorage.setItem('sixCharWord', json.toUpperCase()));
       fetch('https://generaterandomword.herokuapp.com/words/seven')
         .then((response) => response.text())
-        .then((json) => AsyncStorage.setItem('sevenCharWord', json));
+        .then((json) => AsyncStorage.setItem('sevenCharWord', json.toUpperCase()));
       fetch('https://generaterandomword.herokuapp.com/words/eight')
         .then((response) => response.text())
-        .then((json) => AsyncStorage.setItem('eightCharWord', json));
+        .then((json) => AsyncStorage.setItem('eightCharWord', json.toUpperCase()));
     }catch (e) {
       // saving error
     }
@@ -44,7 +43,7 @@ export default function App() {
     AsyncStorage.setItem('maxSolvedInARow', "0")
   })
   return (
-    <NavigationContainer>
+    <NavigationContainer >
       <Drawer.Navigator useLegacyImplementation initialRouteName="Shufflet Cinco Letras">
         <Drawer.Screen name="Shufflet Cinco Letras" component={Main} />
         <Drawer.Screen name="Shufflet seis Letras" component={Main} />
@@ -53,8 +52,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-const style = StyleSheet.create({
-  headerIcon: {
-    marginRight: 10
-  }
-});

@@ -1,20 +1,18 @@
 
 import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, Text, View, StyleSheet, Dimensions} from 'react-native';
+
+
 
 const keySequence = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-  ["Por favor", "funciona"],
+  ["Apagar", "Enter"],
 ];
 
-const Keyboard = () => {
-  isDisabled = false;
-  
-  const onKeyPress = (key) => {
-    console.log(key)
-    }
+const Keyboard =  (props) => {
+  const {onKeyPress, disabledKeyList, correctLettersList, existingLettersList} = props;
 
   return (
     <>
@@ -22,15 +20,18 @@ const Keyboard = () => {
         return (
           <View key={'key-row-' + rowIndex} style={styles.row}>
             {row.map(key => {
+              const isDisabled = disabledKeyList.includes(key);
+              const correct = correctLettersList.includes(key);
+              const exists = existingLettersList.includes(key);
+              const cellStyle = correct ? styles.cellCorrect : exists ? styles.cellExists : isDisabled ? styles.cellDisabled : "";
               return (
                 <Pressable
                   key={key}
-                  disabled={isDisabled}
                   onPress={() => onKeyPress(key)}>
                   <View
-                    style={[styles.cell, isDisabled && styles.cellDisabled]}>
+                    style={[styles.cell, cellStyle]}>
                     <Text
-                      style={[styles.text, isDisabled && styles.textDisabled]}>
+                      style={[styles.text, cellStyle]}>
                       {key}
                     </Text>
                   </View>
@@ -44,8 +45,12 @@ const Keyboard = () => {
   );
 };
 
-const styles = StyleSheet.create({
+export default Keyboard;
+
+
+const styles =  StyleSheet.create({
   row: {
+    margin:'auto',
     flexDirection: 'row',
     marginBottom: 5,
   },
@@ -60,6 +65,12 @@ const styles = StyleSheet.create({
   cellDisabled: {
     borderColor: 'grey',
   },
+  cellExists: {
+    borderColor: 'yellow',
+  },
+  cellCorrect: {
+    borderColor: 'green',
+  },
   text: {
     color: 'white',
     fontSize: 16,
@@ -68,5 +79,3 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
 });
-
-export default Keyboard;

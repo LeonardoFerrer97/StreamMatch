@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TextInput, View, Alert  } from "react-native";
+import { StyleSheet, TextInput, View, Alert, Dimensions  } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalHistory from './ModalHistory';
 import Keyboard from './Keyboard';
 
+const {height, width} = Dimensions.get('window');
+
 let numberOfLetters = 5;
+
+let disabledKeyList = [];
+let correctLettersList = [];
+let existingLettersList = [];
 
 const Main = ()  => {     
   const [lineFocus, setLineFocus] = useState(['auto','none','none','none','none','none'])
@@ -29,10 +35,10 @@ const Main = ()  => {
   const handleSubmitEditing = async (key) => {
     for(let a = 0;a<numberOfLetters;a++){
       var char = lineRef[key][a].current.value
-      console.log(char)
       if(char == undefined || char == ''){
         Alert.alert("Essa palavra é muito curta")
         lineRef[key][0].current.focus();
+        onFocus = [key,0];
         return;
       }
     }
@@ -41,7 +47,7 @@ const Main = ()  => {
         wordExist += lineRef[key][a].current.value
       }
       var exists = true;
-       await fetch('https://generaterandomword.herokuapp.com/words/exists/' + wordExist )
+       await fetch('https://generaterandomword.herokuapp.com/words/exists/' + wordExist.toLowerCase() )
         .then((response) => response.text())
         .then((json) => {
           if(json == "false"){
@@ -52,10 +58,10 @@ const Main = ()  => {
       if(!exists){
         for(let a = 0;a<numberOfLetters;a++){
           lineRef[key][a].current.value = undefined
-          console.log("value: " + lineRef[key][a].current.value)
           lineRef[key][a].current.clear()
         }
         lineRef[key][0].current.focus()
+        onFocus = [key,0];
         return;
       }
       var isSolved = true;
@@ -63,8 +69,9 @@ const Main = ()  => {
       let coutingCharsAux = {};
       Object.assign(coutingCharsAux,coutingChars)
       for(let a = 0;a<numberOfLetters;a++){
-        var char = lineRef[key][a].current.value
+        var char = lineRef[key][a].current.value.toUpperCase();
         if(char == word[a]){
+          correctLettersList.push(char);
           lineRef[key][a].current.setNativeProps({
             style:{backgroundColor: '#3fba29'}
           });
@@ -72,6 +79,7 @@ const Main = ()  => {
             coutingCharsAux[char]--;
           }
         }else if(word.indexOf(char) >= 0){
+          existingLettersList.push(char);
           isSolved = false;
           var containChar = {char:char,a:a};
           containingChars.push(containChar)
@@ -79,6 +87,7 @@ const Main = ()  => {
             style:{backgroundColor: 'grey'}
           });
         }else{
+          disabledKeyList.push(char);
           lineRef[key][a].current.setNativeProps({
             style:{backgroundColor: 'grey'}
           });
@@ -104,24 +113,32 @@ const Main = ()  => {
         })
         setLineFocus(['none','none','none','none','none','none'])
         return
-      }
-      for(let b in containingChars){
-        if(coutingCharsAux[containingChars[b].char] > 0){
-          lineRef[key][containingChars[b].a].current.setNativeProps({
-            style:{backgroundColor: '#fff700'}
-          });
-          coutingCharsAux[containingChars[b].char]--
-        }else{
-          lineRef[key][containingChars[b].a].current.setNativeProps({
-            style:{backgroundColor: 'grey'}
-          });
-
+      }else{
+        console.log(key,numberOfLines)
+        if(key>=numberOfLines.length -1){
+          setIsModalHistoryOpen(true)
+          setLineFocus(['none','none','none','none','none','none'])
+          return
         }
-      }
-      const newLineFocus = (['none','none','none','none','none','none']);
-      newLineFocus[key+1] = 'auto'
-      setLineFocus(newLineFocus)
-      lineRef[key+1][0].current.focus();
+        for(let b in containingChars){
+          if(coutingCharsAux[containingChars[b].char] > 0){
+            lineRef[key][containingChars[b].a].current.setNativeProps({
+              style:{backgroundColor: '#fff700'}
+            });
+            coutingCharsAux[containingChars[b].char]--
+          }else{
+            lineRef[key][containingChars[b].a].current.setNativeProps({
+              style:{backgroundColor: 'grey'}
+            });
+
+          }
+        }
+        const newLineFocus = (['none','none','none','none','none','none']);
+        newLineFocus[key+1] = 'auto'
+        setLineFocus(newLineFocus)
+        lineRef[key+1][0].current.focus();
+        onFocus = [key+1,0];
+    }
     
   }
   const configure = () => {
@@ -142,10 +159,31 @@ const Main = ()  => {
     }
   }
 
+  let onFocus = [0,0];
+  const onKeyPress = (key) =>{
+    if(key == "Enter"){
+      handleSubmitEditing(onFocus[0]);
+    }
+    else if(key == "Apagar"){
+      lineRef[onFocus[0]][onFocus[1]].current.value = "";
+      if(onFocus[1] > 0){
+        onFocus[1] -=1;
+        lineRef[onFocus[0]][onFocus[1]].current.focus();
+      }
+    }
+    else{
+      lineRef[onFocus[0]][onFocus[1]].current.value = key;
+      if(onFocus[1] < 4){
+        onFocus[1] +=1;
+        lineRef[onFocus[0]][onFocus[1]].current.focus();
+      }
+    }
+    
+  }
 
   if(!isModalHistoryOpen){
     return (
-      <View style = {[style.container]}>
+      <View style = {[style.container]} id = "debug">
               {
                 numberOfLines.map((key) => (
                   <View tabIndex={key} key={key} 
@@ -155,120 +193,52 @@ const Main = ()  => {
                       <TextInput tabIndex={key + '1'} key={key + '1'} maxLength={1}  style={[style.input]}
                       showSoftInputOnFocus={false}
                         ref={lineRef[key][0]}
-                        onChange={(event) => {
+        
+                        onFocus={() => {
+                          onFocus = [key,0];
                         }}
-                        onChangeText={(value) => {
-                          if (value.length === 1) {
-                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
-                              console.log(lineRef[key][0]._root)
-                              lineRef[key][0].current.clear();
-                              Alert.alert("Esse character não é permitido")
-                            }else{
-                              lineRef[key][0].current.value = value;
-                              lineRef[key][1].current.focus();
-                            }
-                          }
-                        }}
-                        onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Backspace') {
-                          }
-                        }}
-                        returnKeyType="next"
-                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                        returnKeyType="next"/>
                       <TextInput  tabIndex={key + '2'} key={key + '2'} maxLength={1} style={[style.input]}
                       showSoftInputOnFocus={false}
                         ref={lineRef[key][1]}
-                        onChangeText={(value) => {
-                          if (value.length === 1) {
-                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
-                              lineRef[key][1].current.clear();
-                              Alert.alert("Esse character não é permitido")
-                              lineRef[key][1].current.focus();
-                            }else{
-                              lineRef[key][1].current.value = value;
-                              lineRef[key][2].current.focus();
-                            }
-                          }
+                        onFocus={() => {
+                          onFocus = [key,1];
                         }}
-                        onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Backspace') {
-                            lineRef[key][0].current.focus();
-                          }
-                        }}
-                        returnKeyType="next"
-                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                        returnKeyType="next"/>
               
                       <TextInput  tabIndex={key + '3'} key={key + '3'} maxLength={1} style={[style.input]}
                       showSoftInputOnFocus={false}
                         ref={lineRef[key][2]}
-                        onChangeText={(value) => {
-                          if (value.length === 1) {
-                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
-                              lineRef[key][2].current.clear();
-                              Alert.alert("Esse character não é permitido")
-                            }else{
-                              lineRef[key][2].current.value = value;
-                              lineRef[key][3].current.focus();
-                            }
-                          }
+                        onFocus={() => {
+                          onFocus = [key,2];
                         }}
-                        onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Backspace') {
-                            lineRef[key][1].current.focus();
-                          }
-                        }}
-                        returnKeyType="next"
-                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                        returnKeyType="next"/>
               
                       <TextInput  tabIndex={key + '4'} key={key + '4'} maxLength={1} style={[style.input]}
-                      showSoftInputOnFocus={false}
+                        showSoftInputOnFocus={false}
                         ref={lineRef[key][3]}
-                        onChangeText={(value) => {
-                          if (value.length === 1) {
-                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
-                              lineRef[key][3].current.clear();
-                              Alert.alert("Esse character não é permitido")
-                            }else{
-                              lineRef[key][3].current.value = value;
-                              lineRef[key][4].current.focus();
-                            }
-                          }
+                        onFocus={() => {
+                          onFocus = [key,3];
                         }}
-                        onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Backspace') {
-                            lineRef[key][2].current.focus();
-                          }
-                        }}
-                        returnKeyType="next"
-                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                        returnKeyType="next"/>
               
                       <TextInput  tabIndex={key + '5'} key={key + '5'} maxLength={1} style={[style.input]}
                       showSoftInputOnFocus={false}
                         ref={lineRef[key][4]}
                         returnKeyType="next"
-                        onChangeText={(value) => {
-                          if (value.length === 1) {
-                            if (!((value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90) || (value.charCodeAt(0) >= 97 && value.charCodeAt(0) <= 122))){
-                              lineRef[key][4].current.clear();
-                              Alert.alert("Esse character não é permitido")
-                            }else{
-                              
-                              lineRef[key][4].current.value = value;
-                            }
-                          }
-                        }}
-                        onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Backspace') {
-                            lineRef[key][4].current.clear();
-                            lineRef[key][3].current.focus();
-                          }
-                        }}
-                        onSubmitEditing={() => handleSubmitEditing(key)}/>
+                        onFocus={() => {
+                          onFocus = [key,4];
+                        }}/>
                   </View>
                 ))
               }
-              
-              <Keyboard/>
+              <View style = {[style.keyboard]}>
+                <Keyboard 
+                  onKeyPress={onKeyPress}
+                  disabledKeyList = {disabledKeyList}
+                  correctLettersList = {correctLettersList}
+                  existingLettersList = {existingLettersList}/>
+              </View>
       </View>          
     );
   }else{
@@ -283,7 +253,8 @@ const style = StyleSheet.create({
   container: {
     flex : 1,
     flexDirection : 'column',
-    overflow: 'scroll'
+    height:height,
+    backgroundColor:'lightblue'
   },
   title:{
     color:'grey',
@@ -292,12 +263,15 @@ const style = StyleSheet.create({
   }, 
   form: {
     justifyContent:'center',
-    flexDirection:'row'
+    flexDirection:'row',
+    flexWrap: 'wrap',
+    maxHeight:height/10,
+    margin:5
   },
   input: { 
-    fontSize: 200,
+    fontSize: '500%',
     maxWidth: '15%',
-    maxHeight: '30%',
+    maxHeight: '100%',
     textAlign:'center',
     marginRight:5,
     marginLeft:5,
@@ -309,5 +283,10 @@ const style = StyleSheet.create({
   },
   button: {
     backgroundColor: '#228CDB'
+  },
+  keyboard: {
+    justifyContent: 'center',
+    flex:1,
+    width: width,
   }
 })
